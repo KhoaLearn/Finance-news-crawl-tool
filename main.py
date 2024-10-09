@@ -4,8 +4,9 @@ import os
 from src.crawler_cafebiz import collect_articles_between_dates as cafebiz_collect
 from src.crawler_vnexpress import scrape_articles as vnexpress_collect
 from src.crawler_cafef import collect_articles_between_dates as cafef_collect
+from src.crawler_vietnamnet import collect_articles_between_dates as vietnamnet_collect
 from src.utils import save_to_json
-from src.clean import clean_articles  # Import the cleaning function
+from src.clean import clean_articles, load_stopwords  # Import the cleaning function
 
 def get_valid_date_input(prompt):
     while True:
@@ -26,10 +27,10 @@ def main():
         os.makedirs('data')
     
     # Lựa chọn website cần thu thập dữ liệu
-    website_choice = input("Select website to scrape (1: Cafebiz, 2: VNExpress, 3: Cafef): ")
+    website_choice = input("Select website to scrape (1: Cafebiz, 2: VNExpress, 3: Cafef, 4: Vietnamnet): ")
     
-    if website_choice not in ["1", "2", "3"]:
-        print("Invalid selection. Please select 1, 2, or 3.")
+    if website_choice not in ["1", "2", "3", "4"]:
+        print("Invalid selection. Please select 1, 2, 3 or 4.")
         return
 
     # Nhập ngày bắt đầu và kết thúc từ người dùng theo định dạng YYYY-MM-DD
@@ -54,9 +55,15 @@ def main():
         print(f"Scraping Cafef from {start_date.strftime('%Y-%m-%d')} to {end_date.strftime('%Y-%m-%d')}...")
         articles = cafef_collect(start_date, end_date)
         output_file = "data/cafef_articles.json"  # Save to 'data/' folder
-
+    elif website_choice == "4":
+        print(f"Scraping Vietnamnet from {start_date.strftime('%Y-%m-%d')} to {end_date.strftime('%Y-%m-%d')}...")
+        articles = vietnamnet_collect(start_date, end_date)
+        output_file = "data/vietnamnet_collect.json"  # Save to 'data/' folder
+    
     # Clean the articles before saving
-    cleaned_articles = clean_articles(articles)
+    stopwords_path = "/Users/datarist/Finance-news-crawl-tool/data/vietnamese.txt"
+    stopwords = load_stopwords(stopwords_path)
+    cleaned_articles = clean_articles(articles, stopwords)
 
     # Lưu kết quả vào file JSON trong thư mục 'data/'
     save_to_json(cleaned_articles, output_file)

@@ -56,6 +56,12 @@ def extract_article_details(article_url):
             author_info = last_line.replace("\n", "").replace(",", "").replace(".", "").strip()
             content = content.rsplit('.', 1)[0].strip()
         
+        
+        # Lấy category từ <ul class="breadcrumb"> -> <li><a>
+        breadcrumb = soup.find('ul', class_='breadcrumb')
+        category_tag = breadcrumb.find('li').find('a') if breadcrumb else None
+        category = category_tag.get_text(strip=True) if category_tag else "Unknown"
+        
         collected_date = datetime.now().strftime('%Y-%m-%d')
         
         return {
@@ -64,6 +70,7 @@ def extract_article_details(article_url):
             "content": content,
             "published_date": published_date,
             "author_info": author_info,
+            "category": category,
             "collected_date": collected_date
         }
     except Exception as e:

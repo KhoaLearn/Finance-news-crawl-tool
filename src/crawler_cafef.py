@@ -9,7 +9,7 @@ def extract_article_details(article_url, seen_urls):
     try:
         # Kiểm tra nếu URL đã tồn tại trong set seen_urls
         if article_url in seen_urls:
-            print(f"Duplicate article: {article_url}")
+            # print(f"Duplicate article: {article_url}")
             return None
         
         headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64; rv:11.0) Gecko/20100101'}
@@ -44,6 +44,11 @@ def extract_article_details(article_url, seen_urls):
         author_info = soup.find('p', class_='author')
         author = author_info.get_text(strip=True) if author_info else "Unknown"
         
+        # Lấy chuyên mục (category) từ <a data-role="cate-name" class="category-page__name cat">
+        category_tag = soup.find('a', {'data-role': 'cate-name', 'class': 'category-page__name cat'})
+        category = category_tag.get_text(strip=True) if category_tag else "Unknown"
+        
+        
         # Ngày thu thập dữ liệu
         collected_date = datetime.now().strftime('%Y-%m-%d')
         
@@ -56,6 +61,7 @@ def extract_article_details(article_url, seen_urls):
             "content": content,
             "published_date": published_date,
             "author": author,
+            "category": category,
             "collected_date": collected_date
         }
     except Exception as e:
@@ -82,7 +88,7 @@ def collect_articles_from_page(page_url, seen_urls):
         link = tag.find('a', href=True)
         if link:
             href = link['href']
-            title = link.get('title')  # Extract title from 'title' attribute
+            title = link.get('title')
             
             # Kiểm tra số từ trong tiêu đề (ít nhất 6 từ)
             if title and len(title.split()) >= 6:
